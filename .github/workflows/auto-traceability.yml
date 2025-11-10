@@ -127,41 +127,30 @@ jobs:
                 labels: [primaryRequirement, 'auto-classified']
               });
 
-              // Cria comentário com sugestão de template
-              const template = `
-                **Auto Traceability**
+              const template = "**Auto Traceability**\n\n" +
+                "Detectei que esta issue pode estar relacionada ao requisito: **" + primaryRequirement + "**\n\n" +
+                "**Sugestão de template para o corpo da issue:**\n\n" +
+                "```markdown\n" +
+                "**Requisito:** " + primaryRequirement + "-" + issue.number.toString().padStart(3, '0') + "\n" +
+                "**Atende a:** " + primaryRequirement + " - [Ver documento completo](/documentacao/produto/requisitos.md)\n\n" +
+                "## Descrição\n" +
+                body + "\n\n" +
+                "## Critérios de Aceite\n" +
+                "- [ ] [Descreva o primeiro critério]\n" +
+                "- [ ] [Descreva o segundo critério]\n\n" +
+                "---\n\n" +
+                "*Classificação automática - Revisar e ajustar se necessário*\n" +
+                "```\n\n" +
+                "_Mantenha a descrição original e adicione as informações de traceability acima._";
 
-                Detectei que esta issue pode estar relacionada ao requisito: **${primaryRequirement}**
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: template
+              });
 
-                **Sugestão de template para o corpo da issue:**
-
-                \`\`\`markdown
-                **Requisito:** ${primaryRequirement}-${issue.number.toString().padStart(3, '0')}
-                **Atende a:** ${primaryRequirement} - [Ver documento completo](/documentacao/produto/requisitos.md)
-
-                ## Descrição
-                ${body}
-
-                ## Critérios de Aceite
-                - [ ] [Descreva o primeiro critério]
-                - [ ] [Descreva o segundo critério]
-
-                ---
-
-                *Classificação automática - Revisar e ajustar se necessário*
-                \`\`\`
-
-                _Mantenha a descrição original e adicione as informações de traceability acima._
-                              `;
-
-                              await github.rest.issues.createComment({
-                                owner: context.repo.owner,
-                                repo: context.repo.repo,
-                                issue_number: issue.number,
-                                body: template
-                              });
-
-                              console.log(`Issue #${issue.number} classificada como: ${primaryRequirement}`);
-                            } else {
-                              console.log(`Nenhum requisito detectado para issue #${issue.number}`);
-                            }
+              console.log(`Issue #${issue.number} classificada como: ${primaryRequirement}`);
+            } else {
+              console.log(`Nenhum requisito detectado para issue #${issue.number}`);
+            }
